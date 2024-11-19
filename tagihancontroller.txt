@@ -1,0 +1,123 @@
+public function store(StoreTagihanRequest $request)
+    {
+        $requestData = $request->validated();
+        $jpIdArray = $requestData['jp_id'];
+        //ambil semua data siswa dengan status aktif
+        $siswa = \App\Models\Siswa::currentStatus('aktif')->get();
+        dd($siswa);
+        $siswa = Siswa::query();
+        $tahun_ajaran = Tahun_Ajaran::query();
+        $kelas = Kelas::query();
+        // if($requestData['nohp']  != ''){
+        //     $siswa->where('nohp', $requestData['nohp']);
+        // }
+        if($requestData['tahun_ajaran']  != ''){
+            $tahun_ajaran->where('tahun_ajaran', $requestData['tahun_ajaran']);
+        }
+        if($requestData['kelas']  != ''){
+            $kelas->where('kelas', $requestData['kelas']);
+        }
+        $siswa = $siswa->get();
+        $tahun_ajaran = $tahun_ajaran->get();
+        $kelas = $kelas->get();
+        
+        foreach ($siswa as $item) {
+            $itemSiswa = $item;
+            foreach ($tahun_ajaran as $th) {
+                $itemTahun = $th;
+                foreach ($kelas as $k) {
+                    $itemKelas = $k;
+                    $jp = Jenis_Pembayaran::whereIn('id', $jpIdArray)->get();
+                    // $dataTagihan = [
+                    //     'siswa_id' => $itemSiswa->id,
+                    //     'nohp' => $requestData['nohp'],
+                    //     'tahun_ajaran' => $itemTahun->tahun_ajaran,
+                    //     'kelas' => $itemKelas->kelas,
+                    //     'tgl_tagihan' => $requestData['tgl_tagihan'],
+                    //     'tgl_jatuh_tempo' => $requestData['tgl_jatuh_tempo'],
+                    //     'jenis_bayar' => $itemJP->nama,
+                    //     'jumlah_bayar' => $itemJP->jumlah,
+                    //     'keterangan' => $requestData['keterangan'],
+                    //     'status' => 'Baru'
+                    // ];
+                    // $tglJatuhTempo = Carbon::parse($requestData['tgl_jatuh_tempo']);
+                    // $tglTagihan = Carbon::parse($requestData['tgl_tagihan']);
+                    // $bulanTagihan = $tglTagihan->format('m');
+                    // $tahunTagihan = $tglTagihan->format('Y');
+                    // $cekTagihan = Model::where('id', $itemSiswa->id)
+                    //     ->where('jenis_bayar', $itemJP->nama)
+                    //     ->whereMonth('tgl_tagihan', $bulanTagihan)
+                    //     ->where('tgl_tagihan', $tahunTagihan)
+                    //     ->first();
+                    // if ($cekTagihan == null) {
+                    //     Model::create($dataTagihan);
+                    // }
+                    unset($requestData['jp_id']);
+                    $requestData['siswa_id'] = $itemSiswa->id;
+                    $requestData['status'] = 'Baru';
+                    $tglTagihan = Carbon::parse($requestData['tgl_tagihan']);
+                    $bulanTagihan = $tglTagihan->format('m');
+                    $tahunTagihan = $tglTagihan->format('Y');
+                    $cekTagihan = Model::where('siswa_id', $itemSiswa->id)
+                        ->whereMonth('tgl_tagihan', $bulanTagihan)
+                        ->where('tgl_tagihan', $tahunTagihan)
+                        ->first();
+                    if ($cekTagihan == null) {
+                        $tagihan = Model::create($requestData);
+                        foreach ($jp as $itemJP) {
+                            $detail = DetailTagihan::create([
+                                'tagihan_id' => $tagihan->id,
+                                'nama_bayar' => $itemJP->nama,
+                                'jumlah_bayar' => $itemJP->jumlah,
+                            ]);
+                        }
+                    }
+                    
+                }
+            }
+        }
+        flash('Data Tagihan Berhasil Disimpan')->success();
+        return redirect()->route('tagihan.index');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Tagihan  $tagihan
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request, $id)
+    {
+        $tagihan = Model::with('pembayaran')->findOrFail($id);
+        $data['tagihan'] = $tagihan;
+        $data['siswa'] = $tagihan->siswa;
+        $data['periode'] = Carbon::parse($tagihan->tgl_tagihan)->format('F Y');
+        $data['model'] = new Pembayaran();
+        return view('operator.' . $this->viewShow, $data);
+    }
+
+
+
+
+$itemKelas = $k;
+                    $jp = Jenis_Pembayaran::whereIn('id', $jpIdArray)->get();
+                    unset($requestData['jp_id']);
+                    $requestData['siswa_id'] = $itemSiswa->id;
+                    $requestData['status'] = 'Baru';
+                    $tglTagihan = Carbon::parse($requestData['tgl_tagihan']);
+                    $bulanTagihan = $tglTagihan->format('m');
+                    $tahunTagihan = $tglTagihan->format('Y');
+                    $cekTagihan = Model::where('siswa_id', $itemSiswa->id)
+                        ->whereMonth('tgl_tagihan', $bulanTagihan)
+                        ->where('tgl_tagihan', $tahunTagihan)
+                        ->first();
+                    if ($cekTagihan == null) {
+                        $tagihan = Model::create($requestData);
+                        foreach ($jp as $itemJP) {
+                            $detail = DetailTagihan::create([
+                                'tagihan_id' => $tagihan->id,
+                                'nama_bayar' => $itemJP->nama,
+                                'jumlah_bayar' => $itemJP->jumlah,
+                            ]);
+                        }
+                    }
