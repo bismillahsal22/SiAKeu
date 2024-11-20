@@ -31,7 +31,7 @@ class TagihanController extends Controller
     public function index(Request $request)
     {
         $models = Model::orderBy('tgl_tagihan', 'asc');;
-        if($request->filled('bulan')){
+        if ($request->filled('bulan')) {
             $models = $models->whereMonth('tgl_tagihan', $request->bulan);
         }
         // Filter berdasarkan kelas jika diberikan
@@ -45,7 +45,7 @@ class TagihanController extends Controller
         // if ($request->filled('tahun_ajaran')) {
         //     $models = $models->where('tahun_ajaran_id', $request->tahun_ajaran);
         // }
-        
+
         if ($request->filled('q')) {
             $models = $models->search($request->q);
         }
@@ -54,7 +54,7 @@ class TagihanController extends Controller
             $models = $models->where('status', $request->status);
         }
 
-        return view('admin.' .$this->viewIndex, [
+        return view('admin.' . $this->viewIndex, [
             'models' => $models->paginate(50),
             'routePrefix' => $this->routePrefix,
             'title' => 'Daftar Tagihan Siswa',
@@ -74,15 +74,15 @@ class TagihanController extends Controller
         $data = [
             'model' => new Model(),
             'method' => 'POST',
-            'route' => $this->routePrefix. '.store',
-            'button' => 'Simpan', 
+            'route' => $this->routePrefix . '.store',
+            'button' => 'Simpan',
             'title' => 'Form Tambah Tagihan Siswa',
             'nama' => Siswa::where('status_siswa', '!=', 'Lulus')->pluck('nama', 'nama'),
             'nama_tag' => 'Sumbangan Sukarela Orang Tua',
         ];
-        return view('admin.' .$this->viewCreate, $data);
+        return view('admin.' . $this->viewCreate, $data);
     }
-    
+
     public function getSiswaDetails(Request $request)
     {
         $siswa = Siswa::where('nama', $request->nama)->with('tahunAjaran')->first();
@@ -116,13 +116,13 @@ class TagihanController extends Controller
         $kelas = Kelas::query();
 
         // Proses pencarian siswa
-        if($requestData['nama'] != '') {
+        if ($requestData['nama'] != '') {
             $siswa->where('nama', $requestData['nama']);
         }
-        if($requestData['nis'] != '') {
+        if ($requestData['nis'] != '') {
             $siswa->where('nis', $requestData['nis']);
         }
-        if($requestData['kelas'] != '') {
+        if ($requestData['kelas'] != '') {
             $kelas->where('kelas', $requestData['kelas']);
         }
         $siswa = $siswa->get();
@@ -139,13 +139,16 @@ class TagihanController extends Controller
                 $tglTagihan = Carbon::parse($requestData['tgl_tagihan']);
                 $bulanTagihan = $tglTagihan->format('m');
                 $tahunTagihan = $tglTagihan->format('Y');
+                $tglTagihan = Carbon::parse($requestData['tgl_tagihan'])->format('Y-m-d');
                 $cekTagihan = Model::where('siswa_id', $itemSiswa->id)
-                    ->whereMonth('tgl_tagihan', $bulanTagihan)
-                    ->where('tgl_tagihan', $tahunTagihan)
+                    ->whereMonth('tgl_tagihan', Carbon::parse($tglTagihan)->format('m'))
+                    ->whereYear('tgl_tagihan', Carbon::parse($tglTagihan)->format('Y'))
                     ->first();
 
-                // Jika tidak ada tagihan sebelumnya, buat tagihan baru
-                if ($cekTagihan == null) {
+                if (
+                    $cekTagihan == null
+                ) {
+                    $requestData['tgl_tagihan'] = $tglTagihan;
                     $tagihan = Model::create($requestData);
                     $wali = \App\Models\User::whereIn('id', $siswa->pluck('wali_id'))->get();
                     Notification::send($wali, new TagihanNotification($tagihan));
@@ -159,7 +162,7 @@ class TagihanController extends Controller
                 }
             }
         }
-        
+
         flash('Tagihan Berhasil Ditambahkan')->success();
         return redirect()->route('tagihan.index');
     }
