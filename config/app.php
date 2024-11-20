@@ -197,6 +197,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+
+        ArielMejiaDev\LarapexCharts\LarapexChartsServiceProvider::class,
+
     ],
 
     /*
@@ -212,6 +215,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'LarapexChart' => ArielMejiaDev\LarapexCharts\Facades\LarapexChart::class,
     ])->toArray(),
 
 ];
