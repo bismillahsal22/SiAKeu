@@ -29,8 +29,8 @@ class SiswaController extends Controller
     {
         // Ambil data siswa yang belum lulus, beserta relasi yang diperlukan
         $query = Siswa::with('wali', 'user', 'tahunAjaran', 'kelas')
-                ->where('status_siswa', '!=', 'Lulus')
-                ->orderBy('nama', 'asc');
+            ->where('status_siswa', '!=', 'Lulus')
+            ->orderBy('nama', 'asc');
 
         // Hitung total siswa yang belum lulus
         $totalSiswa = $query->count();
@@ -92,14 +92,14 @@ class SiswaController extends Controller
         $data = [
             'model' => new \App\Models\User(),
             'method' => 'POST',
-            'route' => $this->routePrefix. '.store',
-            'button' => 'Simpan', 
+            'route' => $this->routePrefix . '.store',
+            'button' => 'Simpan',
             'title' => 'Form Tambah Siswa',
             'wali' => User::where('akses', 'wali')->pluck('name', 'id'),
             'tahun_ajaran_id' => Tahun_Ajaran::pluck('tahun_ajaran', 'id'),
             'kelas' => Kelas::pluck('kelas', 'kelas'),
         ];
-        return view('admin.' .$this->viewCreate, $data);
+        return view('admin.' . $this->viewCreate, $data);
     }
 
     /**
@@ -125,15 +125,15 @@ class SiswaController extends Controller
             'ibu' => 'required',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5000'
         ]);
-        
-        if($request->hasFile('foto')){
+
+        if ($request->hasFile('foto')) {
             $requestData['foto'] = $request->file('foto')->store('public');
-        } 
-        
-        if($request->filled('wali_id')){
+        }
+
+        if ($request->filled('wali_id')) {
             $requestData['status_wali'] = 'ok';
         }
-        
+
         $requestData['user_id'] = auth()->user()->id;
         $siswa = Model::create($requestData);
         flash('Siswa berhasil ditambahkan dan disimpan')->success();
@@ -167,14 +167,14 @@ class SiswaController extends Controller
         $data = [
             'model' => Model::findOrFail($id),
             'method' => 'PUT',
-            'route' => [$this->routePrefix .'.update', $id],
+            'route' => [$this->routePrefix . '.update', $id],
             'button' => 'Update',
             'title' => 'Form Edit Data Siswa',
             'wali' => User::where('akses', 'wali')->pluck('name', 'id'),
             'tahun_ajaran_id' => Tahun_Ajaran::pluck('tahun_ajaran', 'id'),
             'kelas' => Kelas::pluck('kelas', 'kelas'),
         ];
-        return view('admin.' .$this->viewEdit, $data);
+        return view('admin.' . $this->viewEdit, $data);
     }
 
     /**
@@ -190,7 +190,7 @@ class SiswaController extends Controller
             $requestData = $request->validate([
                 'wali_id' => 'nullable',
                 'nama' => 'required',
-                'nis' => 'required|unique:siswas,nis,'.$id,
+                'nis' => 'required|unique:siswas,nis,' . $id,
                 'tahun_ajaran_id' => 'required',
                 'kelas' => 'required',
                 'tempat_lahir' => 'required',
@@ -205,7 +205,7 @@ class SiswaController extends Controller
         } else {
             $requestData = $request->validate([
                 'nama' => 'required',
-                'nis' => 'required|unique:siswas,nis,'.$id,
+                'nis' => 'required|unique:siswas,nis,' . $id,
                 'tahun_ajaran_id' => 'required',
                 'kelas' => 'nullable',
                 'tempat_lahir' => 'nullable',
@@ -221,19 +221,18 @@ class SiswaController extends Controller
 
         $model = Model::findOrFail($id);
 
-        if($request->hasFile('foto')){
-            if($model->foto != null && Storage::exists($model->foto))
-            {
+        if ($request->hasFile('foto')) {
+            if ($model->foto != null && Storage::exists($model->foto)) {
                 Storage::delete($model->foto);
             }
             $requestData['foto'] = $request->file('foto')->store('public');
         }
 
-        if($request->filled('wali_id')){
+        if ($request->filled('wali_id')) {
             $requestData['status_wali'] = 'ok';
         }
-        
-        $requestData['user_id'] =auth()->user()->id;
+
+        $requestData['user_id'] = auth()->user()->id;
         $model->fill($requestData);
         $model->save();
         flash('Data siswa berhasil diubah');
@@ -245,7 +244,7 @@ class SiswaController extends Controller
         $kelasMap = [
             'X-E1' => 'XI-F1',
             'XI-F1' => 'XII-G1',
-            'XII-G ' => 'Lulus',
+            'XII-G1' => 'Lulus',
             'X-E2' => 'XI-F2',
             'XI-F2' => 'XII-G2',
             'XII-G2' => 'Lulus',
@@ -271,17 +270,23 @@ class SiswaController extends Controller
             'XI-B4' => 'XII-C4',
             'XII-C4' => 'Lulus',
         ];
-    
+
         return $kelasMap[$kelasSaatIni] ?? null;
     }
 
     public function naikKelas(Request $request)
     {
         $tahunAjaranSekarang = Tahun_Ajaran::where('status', 'aktif')->first();
-        // Periksa apakah tahun ajaran ini sudah digunakan untuk kenaikan kelas
+
+        if (!$tahunAjaranSekarang) {
+            flash('Tahun ajaran aktif tidak ditemukan.')->error();
+            return redirect()->back();
+        }
+
+        // Cek apakah kenaikan kelas sudah dilakukan
         $tahunAjaranSudahDigunakan = Siswa::where('tahun_ajaran_id', $tahunAjaranSekarang->id)
-                                        ->where('naik_kelas', true)
-                                        ->exists();
+            ->where('naik_kelas', true)
+            ->exists();
 
         if ($tahunAjaranSudahDigunakan) {
             flash('Kenaikan kelas sudah dilakukan untuk tahun ajaran ini.')->error();
@@ -299,43 +304,45 @@ class SiswaController extends Controller
             $kelasSaatIni = $siswa->kelas;
             $kelasNaik = $this->getNextKelas($kelasSaatIni);
 
+            \Log::info("Kenaikan kelas: {$siswa->nis} dari {$kelasSaatIni} ke {$kelasNaik}");
+
+
+            if ($kelasNaik === null) {
+                // Log warning jika kelas tidak ditemukan dalam mapping
+                flash("Kelas {$kelasSaatIni} tidak ditemukan dalam mapping kenaikan kelas.")->warning();
+                continue;
+            }
+
             if ($kelasNaik === 'Lulus') {
                 $siswa->status_siswa = 'Lulus';
-                $tagihans = $siswa->tagihan()
-                            ->whereIn('status', ['Baru', 'Mengangsur', 'Lunas'])
-                            ->get();
 
+                // Logika arsip tagihan dan penghapusan siswa
+                $tagihans = $siswa->tagihan()->whereIn('status', ['Baru', 'Mengangsur', 'Lunas'])->get();
                 if ($tagihans->isNotEmpty()) {
                     foreach ($tagihans as $tagihan) {
-                        $arsipTagihan = ArsipTagihan::where('nis', $siswa->nis)
-                                                    ->where('tahun_ajaran_id', $tahunAjaranSekarang->id)
-                                                    ->first();
-
-                        if ($arsipTagihan) {
-                            $arsipTagihan->jumlah_bayar += $tagihan->pembayaran()->sum('jumlah_bayar');
-                            $arsipTagihan->save();
-                        } else {
-                            ArsipTagihan::create([
-                                'nis' => $siswa->nis,
+                        // Proses arsip
+                        ArsipTagihan::updateOrCreate(
+                            ['nis' => $siswa->nis, 'tahun_ajaran_id' => $tahunAjaranSekarang->id],
+                            [
                                 'nama' => $siswa->nama,
                                 'kelas' => $siswa->kelas,
-                                'tahun_ajaran_id' => $tahunAjaranSekarang->id,
                                 'jumlah_tag' => $tagihan->jumlah,
                                 'jumlah_bayar' => $tagihan->pembayaran()->sum('jumlah_bayar'),
                                 'kekurangan' => $tagihan->jumlah - $tagihan->pembayaran()->sum('jumlah_bayar'),
                                 'status' => $tagihan->status,
-                            ]);
-                        }
-
+                            ]
+                        );
+                        // Hapus tagihan dan pembayarannya
                         Pembayaran::where('tagihan_id', $tagihan->id)->delete();
                         $tagihan->delete();
                     }
                 } else {
+                    // Arsip siswa tanpa tagihan
                     ArsipTagihan::create([
                         'nis' => $siswa->nis,
                         'nama' => $siswa->nama,
                         'kelas' => $siswa->kelas,
-                        'tahun_ajaran_id' => $tahunAjaranSekarang->id,
+                        'tahun_ajaran_id' => $tahunAjaranSekarang->id - 1,
                         'jumlah_tag' => 0,
                         'jumlah_bayar' => 0,
                         'kekurangan' => 0,
@@ -343,13 +350,13 @@ class SiswaController extends Controller
                     ]);
                 }
 
+                // Hapus siswa
                 $siswa->delete();
-
             } else {
-                // Update kelas siswa jika tidak lulus
+                // Naik kelas
                 $siswa->kelas = $kelasNaik;
-                $siswa->naik_kelas = true; // Tandai bahwa siswa sudah naik kelas
-                $siswa->tahun_ajaran_id = $tahunAjaranSekarang->id; // Tetapkan tahun ajaran saat ini
+                $siswa->naik_kelas = true;
+                $siswa->tahun_ajaran_id = $tahunAjaranSekarang->id;
                 $siswa->save();
             }
         }
@@ -357,5 +364,4 @@ class SiswaController extends Controller
         flash('Kelas siswa berhasil dinaikkan.')->success();
         return redirect()->route('siswa.index');
     }
-
 }
