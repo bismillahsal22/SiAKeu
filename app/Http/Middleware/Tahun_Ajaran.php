@@ -4,8 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Tahun_Ajaran as Tahun_Ajaran_Model;
 
 class Tahun_Ajaran
 {
@@ -18,28 +17,29 @@ class Tahun_Ajaran
      */
     public function handle(Request $request, Closure $next)
     {
-        $tahunAjaran = 'Tahun Ajaran tidak dipilih';
+        // Ambil data tahun ajaran aktif dari database
+        $tahunAjaranModel = Tahun_Ajaran_Model::where('status', 'aktif')->first();
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($user->tahun_ajaran_id) {
-                // Mengambil data tahun ajaran melalui relasi
-                $tahunAjaranModel = \App\Models\Tahun_Ajaran::find($user->tahun_ajaran_id);
-
-                if ($tahunAjaranModel) {
-                    $tahunAjaran = $tahunAjaranModel->tahun_ajaran;
-                } else {
-                    $tahunAjaran = 'Tahun Ajaran tidak ditemukan';
-                }
-            }
+        if ($tahunAjaranModel) {
+            // Jika ditemukan, set nilai tahun ajaran
+            $tahunAjaran = $tahunAjaranModel->tahun_ajaran;
+        } else {
+            // Jika tidak ditemukan, set pesan tahun ajaran tidak ditemukan
+            $tahunAjaran = 'Tahun Ajaran tidak ditemukan';
+            session()->put('alert', 'Tahun Ajaran tidak ditemukan');
         }
 
-        // Membagikan variabel ke semua view
+        // Membagikan variabel tahun ajaran ke semua view
         view()->share('tahun_ajaran_terpilih', $tahunAjaran);
 
-        // Menyimpan alert di session
-        session()->put('alert', 'Tahun Ajaran ' . $tahunAjaran);
-        
+        // Cek apakah tahun ajaran valid atau ada masalah, dan tampilkan alert
+        if ($tahunAjaran == 'Tahun Ajaran tidak ditemukan') {
+            session()->put('alert', 'Tahun Ajaran ' . $tahunAjaran);
+        } else {
+            // Jika tahun ajaran ditemukan, hapus alert jika ada
+            session()->forget('alert');
+        }
+
         return $next($request);
     }
 }

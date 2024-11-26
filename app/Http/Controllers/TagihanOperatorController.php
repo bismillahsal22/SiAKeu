@@ -10,6 +10,7 @@ use App\Http\Requests\StoreTagihanOperatorRequest;
 use App\Http\Requests\UpdateTagihanOperatorRequest;
 use App\Models\Siswa;
 use App\Models\Tahun_Ajaran;
+use Log;
 
 class TagihanOperatorController extends Controller
 {
@@ -27,9 +28,14 @@ class TagihanOperatorController extends Controller
     {
         //mengambil data Tagihan berd. tahun ajaran tertentu
         $tahunAjaranId = Auth::user()->tahun_ajaran_id;
+
+        // Menampilkan nilai $tahunAjaranId ke log
+        Log::info('Tahun Ajaran ID: ' . $tahunAjaranId);
+
         $tagihan = Tagihan::where('tahun_ajaran_id', $tahunAjaranId)
             ->with('tahun_ajaran')
             ->paginate(50);
+
         return view('operator.' . $this->viewIndex, [
             'tagihan' => $tagihan,
             'title' => 'Daftar Tagihan Siswa',
@@ -68,7 +74,7 @@ class TagihanOperatorController extends Controller
     {
         //
     }
-    
+
 
     /**
      * Show the form for editing the specified resource.

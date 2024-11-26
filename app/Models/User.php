@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'akses',
         'nohp',
+        'tahun_ajaran_id',
     ];
 
     /**
@@ -53,12 +54,12 @@ class User extends Authenticatable
     }
 
     //relasi wali ke siswa->dari tabel user ke siswa
-    
+
     public function siswa(): HasMany
     {
         return $this->hasMany(Siswa::class, 'wali_id', 'id');
     }
-    
+
     protected $searchable = [
         'columns' => [
             'name' => 10,
