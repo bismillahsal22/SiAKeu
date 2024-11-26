@@ -198,6 +198,9 @@ return [
         App\Providers\RouteServiceProvider::class,
         ArielMejiaDev\LarapexCharts\LarapexChartsServiceProvider::class,
 
+
+        ArielMejiaDev\LarapexCharts\LarapexChartsServiceProvider::class,
+
     ],
 
     /*
