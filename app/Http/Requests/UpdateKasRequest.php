@@ -28,6 +28,14 @@ class UpdateKasRequest extends FormRequest
             'jenis' => 'required|in:pemasukan,pengeluaran',
             'jumlah' => 'required|numeric',
             'keterangan' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5000'
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'jumlah' => str_replace('.', '', $this->jumlah),
+        ]);
     }
 }

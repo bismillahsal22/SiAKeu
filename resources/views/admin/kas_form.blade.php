@@ -6,12 +6,11 @@
             <div class="card">
                 <h5 class="card-header fw-bold">{{ $title }}</h5>
                 <div class="card-body">                 
-                    {!! Form::model($model, ['route' => $route, 'method' => $method]) !!}   
+                    {!! Form::model($model, ['route' => $route, 'method' => $method, 'files' => true]) !!}   
                     <div class="row">
                         <label for="tanggal" class="col-sm-2">Tanggal</label>
                         <div class="form-input col-sm-10">    
-                            {{--  //Untuk menampilkan tanggal yang sudah ada di database pada form edit, Anda harus memberikan nilai tanggal dari model $kas                         --}}
-                            {!! Form::date('tanggal', null, ['class' => 'form-control']) !!}
+                            {!! Form::date('tanggal', $model->tanggal ? $model->tanggal->format('Y-m-d') : null, ['class' => 'form-control']) !!}
                             <span class="text-danger">{{ $errors->first('tanggal') }}</span>
                         </div>
                     </div>
@@ -35,6 +34,19 @@
                             {!! Form::text('jenis', $jenis, ['class' => 'form-control', 'readonly' => true]) !!}
                             <span class="text-danger">{{ $errors->first('jenis') }}</span>
                         </div>
+                    </div>
+                    @if($model->foto != null)
+                        <div class="m-3">
+                            <img src="{{ \Storage::url($model->foto) }}" alt="" width="100" class="img-thumbnail">
+                        </div>
+                    @endif
+                    <div class="row mt-3">
+                        <label for="foto" class="col-sm-2">Upload Bukti</label>
+                        <div class="form-input col-sm-10">
+                            <span class="text-danger fw-bold">(Format: jpg, jpeg, png, Ukuran Maks: 5MB)</span>
+                            {!! Form::file('foto', ['class' => 'form-control', 'accept' => 'image/*']) !!}
+                        </div>
+                        <span class="text-danger">{{ $errors->first('foto') }}</span>
                     </div>
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-danger">

@@ -8,6 +8,7 @@ use App\Models\Pembayaran;
 use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Tahun_Ajaran;
+use Auth;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -27,13 +28,29 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+    
     public function index(Request $request, DashboardChart $dashboardChart)
     {
         // Ambil tahun ajaran aktif
         $tahunAjaranAktif = Tahun_Ajaran::where('status', 'aktif')->first();
 
         if (!$tahunAjaranAktif) {
-            return redirect()->back()->with('error', 'Tahun ajaran aktif tidak ditemukan.');
+            $data = [
+                'siswa' => 0,
+                'totalPemasukan' => 0,
+                'totalPengeluaran' => 0,
+                'sisaSaldo' => 0,
+                'dataBayarBelumKonfirmasi' => collect(),
+                'tagihanLunas' => 0,
+                'tagihanMengangsur' => 0,
+                'tagihanBaru' => 0,
+                'totalTagihan' => 0,
+                'tagihanBelumLunas' => 0,
+                'dashboardChart' => $dashboardChart->build([0, 0]),
+                'tahun_ajaran_aktif' => null
+            ];
+
+            return view('admin.dashboard', $data)->with('warning', 'Belum ada tahun ajaran aktif');
         }
 
         // Ambil tanggal mulai dan tanggal akhir dari tahun ajaran aktif
@@ -42,8 +59,8 @@ class HomeController extends Controller
 
         // Ambil jumlah siswa berdasarkan tahun ajaran aktif
         $data['siswa'] = Siswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
-                            ->where('status_siswa', '<>', 'Lulus')
-                            ->count();
+            ->where('status_siswa', '<>', 'Lulus')
+            ->count();
 
         // Filter pemasukan berdasarkan tahun ajaran aktif
         $pemasukan = Kas::where('jenis', 'Pemasukan')
@@ -56,7 +73,7 @@ class HomeController extends Controller
         $pengeluaran = Kas::where('jenis', 'pengeluaran')
             ->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir])
             ->get();
-        
+
         $data['totalPengeluaran'] = $pengeluaran->sum('jumlah');
 
         // Hitung sisa saldo jika ada pemasukan atau pengeluaran
@@ -93,6 +110,11 @@ class HomeController extends Controller
         ]);
 
         $data['tahun_ajaran_aktif'] = $tahunAjaranAktif;
+
+        $data['dashboardChart'] = $dashboardChart->build([
+            intval($data['tagihanLunas']),
+            intval($data['tagihanBelumLunas'])
+        ]);
 
         return view('admin.dashboard', $data);
     }

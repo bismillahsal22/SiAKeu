@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreKasRequest;
 use App\Http\Requests\UpdateKasRequest;
 use App\Models\Pembayaran;
-use App\Models\Tagihan;
 use App\Models\Tahun_Ajaran;
+use Illuminate\Support\Facades\Storage;
 
 class KasController extends Controller
 {
@@ -23,25 +23,40 @@ class KasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
-        // Ambil semua data kas terbaru
-        $models = Model::latest();
+{
+    // Ambil semua data kas terbaru
+    $models = Model::latest();
 
-        $tahunAjaran = Tahun_Ajaran::pluck('tahun_ajaran', 'id');
-        // Filter berdasarkan tahun ajaran jika request 'tahun_ajaran' ada
-        if ($request->filled('tahun_ajaran')) {
-            $models = $models->where('tahun_ajaran_id', $request->tahun_ajaran);
+    // Ambil data tahun ajaran untuk dropdown
+    $tahunAjaran = Tahun_Ajaran::pluck('tahun_ajaran', 'id');
+
+    // Filter berdasarkan tahun ajaran jika request 'tahun_ajaran' ada
+    if ($request->filled('tahun_ajaran')) {
+        // Ambil data tahun ajaran berdasarkan id yang dipilih
+        $tahunAjaranData = Tahun_Ajaran::find($request->tahun_ajaran);
+
+        // Pastikan data tahun ajaran ditemukan dan memiliki tanggal mulai dan akhir
+        if ($tahunAjaranData) {
+            $tanggalMulai = $tahunAjaranData->tgl_mulai;
+            $tanggalAkhir = $tahunAjaranData->tgl_akhir;
+
+            // Filter data kas berdasarkan rentang tanggal mulai dan tanggal akhir tahun ajaran
+            $models = $models->whereBetween('tanggal', [$tanggalMulai, $tanggalAkhir]);
         }
-
-        // Lakukan paginasi pada hasil
-        $models = $models->paginate(50);
-
-        return view('admin.kas_index', [
-            'models' => $models,
-            'title' => 'Laporan Kas',
-            'tahunAjaran' => $tahunAjaran,
-        ]);
     }
+
+    // Lakukan paginasi pada hasil
+    $models = $models->paginate(50);
+
+    // Kirim data ke view
+    return view('admin.kas_index', [
+        'models' => $models,
+        'title' => 'Laporan Kas',
+        'tahunAjaran' => $tahunAjaran,
+    ]);
+}
+
+
     
     public function pemasukan(Request $request)
     {
@@ -192,6 +207,9 @@ class KasController extends Controller
     {
         $requestData = $request->validated();
         $requestData = $request->all();
+        if($request->hasFile('foto')){
+            $requestData['foto'] = $request->file('foto')->store('public');
+        } 
         $requestData['user_id'] = auth()->user()->id;
         Model::create($requestData);
 
@@ -240,8 +258,8 @@ class KasController extends Controller
             'jenis' => $kas->jenis,
             'method' => 'PUT',
             'button' => 'Update',
-            'route' => [$this->routePrefix .'.update', $id]
-,           'title' => 'Form Edit ' . ucfirst($kas->jenis)
+            'route' => [$this->routePrefix .'.update', $id],
+            'title' => 'Form Edit ' . ucfirst($kas->jenis),
         ]);
     }
 
@@ -258,6 +276,13 @@ class KasController extends Controller
         $requestData = $request->validated();
         // Ambil data kas berdasarkan ID
         $kas = Model::findOrFail($id);
+        if($request->hasFile('foto')){
+            if($kas->foto != null && Storage::exists($kas->foto))
+            {
+                Storage::delete($kas->foto);
+            }
+            $requestData['foto'] = $request->file('foto')->store('public');
+        }
 
         // Perbarui data kas dengan data yang baru
         $kas->update($requestData);

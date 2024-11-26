@@ -20,6 +20,7 @@
                                 <div class="custom-select-wrapper col-md-3 col-sm-12">
                                     {!! Form::select('tahun_ajaran', $tahunAjaran, request('tahun_ajaran'), ['class' => 'form-control custom-select', 'placeholder' => 'Pilih Tahun Ajaran']) !!}
                                 </div>
+                                
                                 <div class="col-md-2 col-sm-12">
                                     <button type="submit" class="btn btn-primary">Tampilkan</button>
                                 </div>

@@ -18,16 +18,16 @@ class CheckAkses
      */
     public function handle($request, Closure $next, ...$roles)
     {
-        // If user is authenticated but doesn't have the right role, redirect to a different page.
-        if (Auth::check() && !in_array($request->user()->akses, $roles)) {
-            return redirect()->route('unauthorized'); // or another page
-        }
-
-        // If user is not authenticated, redirect to login
+        // Check authentication first
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        
+
+        // Then check role
+        if (!in_array($request->user()->akses, $roles)) {
+            return redirect()->route('unauthorized');
+        }
+
         return $next($request);
     }
 }

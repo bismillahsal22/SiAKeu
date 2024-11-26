@@ -20,7 +20,7 @@
                                                 'class' => 'form-control custom-select',
                                                 'placeholder' => 'Pilih Tahun Ajaran',
                                             ]) !!}
-                                        </div>
+                                        </div>                                                                              
                                         <div class="col-md-2 col-sm-12">
                                             <button type="submit" class="btn btn-primary">Tampilkan</button>
                                         </div>
