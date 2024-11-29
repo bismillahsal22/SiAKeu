@@ -28,50 +28,8 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    // public function index(Request $request, DashboardChart $dashboardChart)
-    // {
-    //     $data = [
-    //         'siswa' => 150,
-    //         'totalPemasukan' => 50000000,
-    //         'totalPengeluaran' => 30000000,
-    //         'sisaSaldo' => 20000000,
-    //         'dataBayarBelumKonfirmasi' => collect([
-    //             (object)[
-    //                 'tagihan' => (object)[
-    //                     'siswa' => (object)[
-    //                         'nama' => 'Siswa A'
-    //                     ]
-    //                 ],
-    //                 'tgl_bayar' => now(),
-    //                 'id' => 1
-    //             ],
-    //             (object)[
-    //                 'tagihan' => (object)[
-    //                     'siswa' => (object)[
-    //                         'nama' => 'Siswa B'
-    //                     ]
-    //                 ],
-    //                 'tgl_bayar' => now(),
-    //                 'id' => 2
-    //             ]
-    //         ]),
-    //         'tagihanLunas' => 80,
-    //         'tagihanMengangsur' => 40,
-    //         'tagihanBaru' => 30,
-    //         'totalTagihan' => 150,
-    //         'tagihanBelumLunas' => 70,
-    //         'dashboardChart' => $dashboardChart->build([80, 70]),
-    //         'tahun_ajaran_aktif' => (object)[
-    //             'tahun_ajaran' => '2023/2024'
-    //         ]
-    //     ];
-
-    //     return view('admin.dashboard', $data);
-    // }
     public function index(Request $request, DashboardChart $dashboardChart)
     {
-
-
         // Ambil tahun ajaran aktif
         $tahunAjaranAktif = Tahun_Ajaran::where('status', 'aktif')->first();
 

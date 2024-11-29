@@ -103,8 +103,22 @@
                             </thead>
                         </table>
                         @if ($model->tgl_konfirmasi != null)
-                            <div class="alert alert-info">
-                                <h4>TAGIHAN INI SUDAH DIBAYARKAN. LUNAS</h4>
+                            <div class="mt-3">
+                                @php
+                                    $totalTagihan = $model->tagihan->detailTagihan->sum('jumlah_bayar');
+                                    $totalDibayar = $model->tagihan->pembayaran->sum('jumlah_bayar');
+                                    $kekurangan = $totalTagihan - $totalDibayar;
+                                @endphp
+                                @if ($kekurangan > 0)
+                                    <div class="alert alert-danger">
+                                        <h6 class="text-center">Tagihan belum lunas dan memiliki <strong> Kekurangan sebesar {{ formatRupiah($kekurangan) }}</h6>
+                                    </div>
+                                    
+                                @else
+                                    <div class="alert alert-primary">
+                                        <h6 class="text-center">Tagihan <strong>LUNAS</h6>
+                                    </div>
+                                @endif
                             </div>
                             <div class="text-center mt-2">
                                 <button class="btn btn-outline-dark">

@@ -81,6 +81,24 @@ class TransaksiController extends Controller
         // Mengambil siswa_id dari tagihan terkait
         $siswaId = $tagihan->siswa_id;
 
+        // Lanjutkan dengan proses pembayaran jika semua validasi terpenuhi
+        $totalDibayar = $tagihan->pembayaran->sum('jumlah_bayar') + $request['jumlah_bayar'];
+        $totalTagihan = $tagihan->detailTagihan()->sum('jumlah_bayar');
+        $kekurangan = $totalTagihan - $tagihan->pembayaran->sum('jumlah_bayar');
+
+        // Cek apakah pembayaran melebihi kekurangan
+        if ($request['jumlah_bayar'] > $kekurangan) {
+            flash('Jumlah pembayaran melebihi kekurangan bayar. Mohon periksa kembali.')->error();
+            return back()->withInput();
+        }
+
+        // Jika pembayaran sama dengan kekurangan, status tagihan menjadi lunas
+        if ($request['jumlah_bayar'] == $kekurangan) {
+            $tagihan->status = 'Lunas';
+        } else {
+            $tagihan->status = 'Mengangsur';
+        }
+
         // Menyimpan pembayaran
         $pembayaran = Pembayaran::create([
             'tagihan_id' => $tagihan->id,
@@ -91,9 +109,8 @@ class TransaksiController extends Controller
             'siswa_id' => $siswaId,
         ]);
         $kasController = new KasController();
-        $kasController->addPemasukanFromPembayaran($request['jumlah_bayar'], $pembayaran->id);
-
-        flash('Pembayaran berhasil disimpan')->success();
+    
+        flash('Pembayaran berhasil disimpan dan akan dicek kembali oleh Admin')->success();
         return back();
     }
 }

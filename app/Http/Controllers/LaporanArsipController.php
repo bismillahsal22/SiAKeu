@@ -23,16 +23,14 @@ class LaporanArsipController extends Controller
             $models = ArsipTagihan::all();
         }
 
-        // Hitung statistik yang diperlukan
         $totalSiswa = $models->count();
         $jumlahLunas = $models->where('status', 'Lunas')->count();
         $jumlahMengangsur = $models->where('status', 'Mengangsur')->count();
         $belumMembayar = $models->where('status', 'Baru')->count();
 
-        // Hitung total pembayaran dan kekurangannya
-        $totalTagihan = $models->sum('jumlah_tag');  // Total tagihan dari semua siswa
-        $totalPembayaran = $models->sum('jumlah_bayar');  // Total pembayaran yang sudah dilakukan
-        $totalKekurangan = $totalTagihan - $totalPembayaran;  // Hitung kekurangan dari total tagihan
+        $totalTagihan = $models->sum('jumlah_tag');
+        $totalPembayaran = $models->sum('jumlah_bayar');
+        $totalKekurangan = $totalTagihan - $totalPembayaran;
 
         return view('admin.cetak_arsip', [
             'title' => 'LAPORAN ARSIP SISWA TAHUN AJARAN :' . ' ' . Tahun_Ajaran::find($selectedTahunAjaran)?->tahun_ajaran ?? 'Semua Tahun',

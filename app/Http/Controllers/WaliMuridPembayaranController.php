@@ -10,6 +10,7 @@ use App\Models\Tagihan;
 use App\Models\WaliBank;
 use App\Models\Pembayaran;
 use App\Models\BankSekolah;
+use App\Models\Tahun_Ajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\PembayaranNotification;
@@ -35,7 +36,6 @@ class WaliMuridPembayaranController extends Controller
     public function create(Request $request)
     {
         $data['listwalibank'] = WaliBank::where('wali_id', Auth::user()->id)->get()->pluck('nama_bank_full', 'id');
-
         $data['tagihan'] = Tagihan::WaliSiswa()->findOrFail($request->tagihan_id);
         $data['model'] = new Pembayaran();
         $data['method'] = 'POST';
@@ -100,10 +100,10 @@ class WaliMuridPembayaranController extends Controller
             ->where('tagihan_id', $request->tagihan_id)
             ->first();
 
-        if ($validasiPembayaran != null) {
-            flash('Data Pembayaran ini sudah pernah dilakukan. Akan segera diKonfirmasi oleh pihak sekolah');
-            return back();
-        }
+        // if ($validasiPembayaran != null) {
+        //     flash('Data Pembayaran ini sudah pernah dilakukan. Akan segera diKonfirmasi oleh pihak sekolah');
+        //     return back();
+        // }
 
         // Validasi input pembayaran
         $request->validate([
@@ -114,6 +114,7 @@ class WaliMuridPembayaranController extends Controller
         // Simpan bukti pembayaran
         $buktiBayar = $request->file('bukti_bayar')->store('public');
         // Data untuk disimpan dalam tabel pembayaran
+        $tahunAjaran = Tahun_Ajaran::where('status', 'aktif')->first();
         $dataPembayaran = [
             'bank_sekolah_id' => $request->bank_sekolah_id,
             'wali_bank_id' => $waliBankId,  // Gunakan ID rekening baru atau yang dipilih
@@ -124,6 +125,7 @@ class WaliMuridPembayaranController extends Controller
             'bukti_bayar' => $buktiBayar,
             'metode_pembayaran' => 'Transfer',
             'user_id' => 0,
+            'tahun_ajaran_id' => $tahunAjaran->id,
         ];
 
         // Mulai transaksi untuk simpan pembayaran

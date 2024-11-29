@@ -90,11 +90,12 @@
                                             <td><strong>Jumlah Pembayaran</td>
                                             <td><strong>: {{ formatRupiah($model->jumlah_bayar) }}</td>
                                         </tr>
+                                        
                                         @php
-                                        $totalTagihan = $model->tagihan->detailTagihan->sum('jumlah_bayar');
-                                        $totalDibayar = $model->tagihan->pembayaran->sum('jumlah_bayar');
-                                        $kekurangan = $totalTagihan - $totalDibayar;
-                                    @endphp
+                                            $totalTagihan = $model->tagihan->detailTagihan->sum('jumlah_bayar');
+                                            $totalDibayar = $model->tagihan->pembayaran->sum('jumlah_bayar');
+                                            $kekurangan = $totalTagihan - $totalDibayar;
+                                        @endphp
                                     @if ($kekurangan > 0)
                                         <tr>
                                             <td><strong>Kekurangan Pembayaran</strong></td>
