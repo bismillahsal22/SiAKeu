@@ -15,16 +15,14 @@ return new class extends Migration
     {
         Schema::create('arsip_tagihans', function (Blueprint $table) {
             $table->id();
-            $table->string('status_siswa');
+            $table->string('status_siswa', 50);
             $table->string('nis', 10)->unique();
-            $table->string('nama', 255);
-            $table->string('kelas');
+            $table->string('nama', 50);
+            $table->string('kelas', 20);
             $table->foreignId('tahun_ajaran_id');
             $table->integer('jumlah_tag');
             $table->bigInteger('jumlah_bayar');
             $table->integer('kekurangan');
-            $table->text('riwayat_tag')->nullable();
-            $table->text('riwayat_bayar')->nullable();
             $table->enum('status', ['Baru', 'Mengangsur', 'Lunas']);
             $table->timestamps();
         });

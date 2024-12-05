@@ -22,9 +22,9 @@ return new class extends Migration
             $table->foreignId('arsip_id')->nullable();
             $table->dateTime('tgl_bayar');
             $table->string('status_konfirmasi')->nullable();
-            $table->double('jumlah_bayar');
+            $table->integer('jumlah_bayar');
             $table->string('bukti_bayar')->nullable();
-            $table->string('metode_pembayaran');
+            $table->string('metode_pembayaran', 50);
             $table->foreignId('user_id')->nullable()->index();
             $table->timestamps();
         });

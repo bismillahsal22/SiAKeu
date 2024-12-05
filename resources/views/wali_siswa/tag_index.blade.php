@@ -4,7 +4,7 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
-                <h5 class="card-header"><i class="fa fa-file-invoice"></i> {{ $title }}</h5>
+                <h5 class="card-header fw-bold"><i class="fa fa-file-invoice"></i> {{ $title }}</h5>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered">

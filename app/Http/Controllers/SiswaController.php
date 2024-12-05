@@ -272,13 +272,12 @@ class SiswaController extends Controller
     public function naikKelas(Request $request)
     {
         $tahunAjaranSekarang = Tahun_Ajaran::where('status', 'aktif')->first();
-
         if (!$tahunAjaranSekarang) {
             flash('Tahun ajaran aktif tidak ditemukan.')->error();
             return redirect()->back();
         }
 
-        // Cek apakah kenaikan kelas sudah dilakukan
+        // Cek apakah kenaikan kelas sudah dilakukan pada tahun ajaran ini
         $tahunAjaranSudahDigunakan = Siswa::where('tahun_ajaran_id', $tahunAjaranSekarang->id)
             ->where('naik_kelas', true)
             ->exists();
@@ -288,6 +287,7 @@ class SiswaController extends Controller
             return redirect()->back();
         }
 
+        // Ambil semua siswa yang belum lulus
         $siswas = Siswa::where('status_siswa', '!=', 'Lulus')->get();
 
         if ($siswas->isEmpty()) {
@@ -301,14 +301,16 @@ class SiswaController extends Controller
 
             \Log::info("Kenaikan kelas: {$siswa->nis} dari {$kelasSaatIni} ke {$kelasNaik}");
 
-
             if ($kelasNaik === null) {
                 // Log warning jika kelas tidak ditemukan dalam mapping
                 flash("Kelas {$kelasSaatIni} tidak ditemukan dalam mapping kenaikan kelas.")->warning();
                 continue;
             }
 
-            if ($kelasNaik === 'Lulus') {
+            // Jika siswa berada di kelas 12 (XII IPA, XII IPS)
+            if (strpos($kelasSaatIni, 'XII') !== false) {
+                $tahunAjaranLulus = $siswa->tahun_ajaran_id;
+                $kelasLulus = $siswa->kelas;
                 $siswa->status_siswa = 'Lulus';
 
                 // Logika arsip tagihan dan penghapusan siswa
@@ -317,17 +319,16 @@ class SiswaController extends Controller
                     foreach ($tagihans as $tagihan) {
                         // Proses arsip
                         ArsipTagihan::updateOrCreate(
-                            ['nis' => $siswa->nis, 'tahun_ajaran_id' => $tahunAjaranSekarang->id],
+                            ['nis' => $siswa->nis, 'tahun_ajaran_id' => $tahunAjaranLulus],
                             [
                                 'nama' => $siswa->nama,
-                                'kelas' => $siswa->kelas,
+                                'kelas' => $kelasLulus, 
                                 'jumlah_tag' => $tagihan->jumlah,
                                 'jumlah_bayar' => $tagihan->pembayaran()->sum('jumlah_bayar'),
                                 'kekurangan' => $tagihan->jumlah - $tagihan->pembayaran()->sum('jumlah_bayar'),
                                 'status' => $tagihan->status,
                             ]
                         );
-                        // Hapus tagihan dan pembayarannya
                         Pembayaran::where('tagihan_id', $tagihan->id)->delete();
                         $tagihan->delete();
                     }
@@ -336,19 +337,16 @@ class SiswaController extends Controller
                     ArsipTagihan::create([
                         'nis' => $siswa->nis,
                         'nama' => $siswa->nama,
-                        'kelas' => $siswa->kelas,
-                        'tahun_ajaran_id' => $tahunAjaranSekarang->id,
+                        'kelas' => $kelasLulus,
+                        'tahun_ajaran_id' => $tahunAjaranLulus,
                         'jumlah_tag' => 0,
                         'jumlah_bayar' => 0,
                         'kekurangan' => 0,
                         'status' => 'Lulus',
                     ]);
                 }
-
-                // Hapus siswa
                 $siswa->delete();
             } else {
-                // Naik kelas
                 $siswa->kelas = $kelasNaik;
                 $siswa->naik_kelas = true;
                 $siswa->tahun_ajaran_id = $tahunAjaranSekarang->id;
@@ -359,4 +357,5 @@ class SiswaController extends Controller
         flash('Kelas siswa berhasil dinaikkan.')->success();
         return redirect()->route('siswa.index');
     }
+
 }

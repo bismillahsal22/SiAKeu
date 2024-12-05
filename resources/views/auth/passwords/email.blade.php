@@ -45,7 +45,7 @@
                     </form>
 
                     <div class="row">
-                        <small class="text-center">Silahkan Masuk Akun Anda Kembali?<a href="{{ route('login') }}">Masuk</a></small>
+                        <small class="text-center">Silahkan Masuk Akun Anda Kembali?<a href="{{ route('login.admin') }}">Masuk</a></small>
                     </div>
                 </div>
             </div>

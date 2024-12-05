@@ -20,7 +20,8 @@ class DashboardOperatorController extends Controller
             return redirect()->back();
         }
         $data['tahunAjaran'] = $tahunAjaranAktif->tahun_ajaran;
-        $data['siswa'] = Siswa::count();
+        $data['siswa'] = Siswa::where('tahun_ajaran_id', $tahunAjaranAktif->id)
+            ->count();
 
         $pembayaran = Pembayaran::where('tagihan_id', $tahunAjaranAktif->id)->get();
         $data['totalSiswaSudahBayar'] = $pembayaran->count();

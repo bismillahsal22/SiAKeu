@@ -16,10 +16,10 @@ return new class extends Migration
         Schema::create('wali_banks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('wali_id');
-            $table->string('kode');
-            $table->string('nama_bank');
-            $table->string('nama_rekening');
-            $table->string('nomor_rekening');
+            $table->string('kode',10);
+            $table->string('nama_bank', 50);
+            $table->string('nama_rekening', 50);
+            $table->string('nomor_rekening', 20);
             $table->timestamps();
         });
     }

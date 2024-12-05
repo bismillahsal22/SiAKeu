@@ -105,9 +105,11 @@
                                         <tr>
                                             <td>Bukti Pembayaran</td>
                                             <td>
-                                                <a href="javascript:void[0]"
-                                                onclick="popupCenter({url: '{{ \Storage::url($model->bukti_bayar) }}', 
-                                                title: 'Bukti Pembayaran Transfer', w: 900, h: 600}); "><u class="text-danger">Lihat Bukti Pembayaran</u></a>
+                                                @if($model->metode_pembayaran == 'Transfer')
+                                                    <a href="{{ \Storage::url($model->bukti_bayar) }}" target="_blank"><u class="text-danger">Lihat Bukti Pembayaran</u></a>
+                                                @else
+                                                    <span>: Tidak ada bukti pembayaran</span> <!-- Pesan jika bukan metode transfer -->
+                                                @endif
                                             </td>
                                         </tr>
                                         <tr>

@@ -17,10 +17,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('bank_id');
             $table->foreignId('user_id');
-            $table->string('kode');
-            $table->string('nama_bank');
-            $table->string('nama_rekening');
-            $table->string('nomor_rekening');
+            $table->string('kode', 10);
+            $table->string('nama_bank', 50);
+            $table->string('nama_rekening', 50);
+            $table->string('nomor_rekening', 10);
             $table->timestamps();
         });
     }

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('detail_tagihans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tagihan_id');
-            $table->string('nama_bayar');
+            $table->string('nama_bayar', 50);
             $table->bigInteger('jumlah_bayar');
             $table->timestamps();
         });

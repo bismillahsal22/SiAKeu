@@ -18,16 +18,7 @@ class ImportSiswa implements ToModel, WithStartRow, WithValidation
     */
     public function model(array $row)
     {
-        $tahunAjaran = Tahun_Ajaran::where('tahun_ajaran', $row[4])->first();
-
-        if (!$tahunAjaran) {
-            // Jika tidak ada, tambahkan tahun ajaran baru ke database
-            $tahunAjaran = Tahun_Ajaran::create([
-                'tahun_ajaran' => $row[4],
-            ]);
-        }
-
-         // Cek apakah kelas sudah ada di database
+        // Cek apakah kelas sudah ada di database
         $kelas = Kelas::where('kelas', $row[3])->first();
         if (!$kelas) {
             // Jika tidak ada, tambahkan kelas baru ke database
@@ -36,11 +27,18 @@ class ImportSiswa implements ToModel, WithStartRow, WithValidation
             ]);
         }
 
+        $tahunAjaran = Tahun_Ajaran::where('tahun_ajaran', $row[4])->first();
+        if (!$tahunAjaran) {
+            // Jika tidak ada, tambahkan tahun ajaran baru ke database
+            $tahunAjaran = Tahun_Ajaran::create([
+                'tahun_ajaran' => $row[4],
+            ]);
+        }
+
         if(!array_filter($row)){
             return null;
         }
         
-        // Gunakan ID tahun ajaran yang baru atau yang ditemukan
         return new Siswa([
             'nis' => $row[1],
             'nama' => $row[2],

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('tahun__ajarans', function (Blueprint $table) {
             $table->id();
-            $table->string('tahun_ajaran')->unique();
+            $table->string('tahun_ajaran', 50)->unique();
             $table->enum('status', ['aktif', 'tidak aktif']);
             $table->date('tgl_mulai')->nullable();
             $table->date('tgl_akhir')->nullable();

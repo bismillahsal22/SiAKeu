@@ -35,8 +35,18 @@ class ForgotPasswordController extends Controller
         if ($user) {
             $user->password = Hash::make($request->password);
             $user->save();
-
-            return redirect()->route('login')->with('success', 'Password berhasil direset.');
+    
+            // Mengecek apakah user adalah admin atau bukan
+            if ($user->akses === 'admin') {
+                // Redirect ke halaman login admin jika role user adalah admin
+                return redirect()->route('login.admin')->with('success', 'Password berhasil direset.');
+            } else {
+                // Redirect ke halaman login pengguna biasa jika role user bukan admin
+                return redirect()->route('login.wali')->with('success', 'Password berhasil direset.');
+            }
         }
+    
+        // Jika user tidak ditemukan
+        return redirect()->back()->withErrors(['email' => 'Email tidak ditemukan.']);
     }
 }

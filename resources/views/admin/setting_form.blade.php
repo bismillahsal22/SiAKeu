@@ -44,7 +44,7 @@
                                 </div>
                             </div>
                         <div class="row mt-2">
-                            <label for="hp_app" class="col-md-2">Telepon Sekollah</label>
+                            <label for="hp_app" class="col-md-2">Telepon Sekolah</label>
                             <div class="col-md-10">
                                 {!! Form::number('hp_app', settings()->get('hp_app'), ['class' => 'form-control']) !!}
                                 <span class="text-danger">{{ $errors->first('hp_app') }}</span>

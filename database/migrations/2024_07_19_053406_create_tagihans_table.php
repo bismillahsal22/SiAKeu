@@ -19,13 +19,13 @@ return new class extends Migration
             $table->foreignId('siswa_id')->index();
             $table->foreignId('arsip_id')->nullable();
             $table->foreignId('tahun_ajaran_id');
-            $table->string('nama');
+            $table->string('nama', 50);
             $table->string('nis', 10);
             $table->string('kelas');
-            $table->string('nama_tag');
+            $table->string('nama_tag', 50);
             $table->integer('jumlah');
             $table->date('tgl_tagihan');
-            $table->string('keterangan')->nullable();
+            $table->text('keterangan')->nullable();
             $table->enum('status', ['Baru', 'Mengangsur', 'Lunas']);
             $table->timestamps();
         });

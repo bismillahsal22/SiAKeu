@@ -187,7 +187,6 @@ return [
         /*
          * Package Service Providers...
          */
-
         /*
          * Application Service Providers...
          */
@@ -197,8 +196,6 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         ArielMejiaDev\LarapexCharts\LarapexChartsServiceProvider::class,
-
-
         ArielMejiaDev\LarapexCharts\LarapexChartsServiceProvider::class,
 
     ],

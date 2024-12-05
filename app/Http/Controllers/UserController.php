@@ -153,8 +153,8 @@ class UserController extends Controller
     public function destroy($id)
     {
         $model = Model::findOrFail($id);
-        if($model->id == 2){
-            flash('Data Tidak Dapat Dihapus')->error();
+        if($model->id == 1){
+            flash('Data tidak dapat dihapus')->error();
             return back();
         }
         $model->delete();

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('jenis', ['pemasukan', 'pengeluaran']);
             $table->date('tanggal');
             $table->integer('jumlah');
-            $table->string('keterangan');
+            $table->text('keterangan');
             $table->string('foto');
             $table->timestamps();
         });

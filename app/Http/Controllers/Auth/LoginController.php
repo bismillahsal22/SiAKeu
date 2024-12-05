@@ -60,8 +60,6 @@ class LoginController extends Controller
             ->withErrors(['email' => 'Email atau Password Anda Salah!']);
     }
 
-
-
     public function operatorLogin(Request $request)
     {
         try {
@@ -152,10 +150,6 @@ class LoginController extends Controller
                 ->withErrors(['error' => 'Terjadi kesalahan, silakan coba lagi.']);
         }
     }
-
-
-
-
 
     public function waliLogin(Request $request)
     {
